@@ -82,7 +82,7 @@ sudo mkfs.vfat ${loop0}p1 || exit 1
 sudo e2label ${loop0}p1 bootfs
 
 # format loop0p2 as ext4 linux partition (linux rootfs)
-sudo mkfs.ext3 ${loop0}p2 || exit 1
+sudo mkfs.ext4 ${loop0}p2 || exit 1
 sudo e2label ${loop0}p2 rootfs
 
 sudo mount ${loop0}p1 $bootfs || exit 1

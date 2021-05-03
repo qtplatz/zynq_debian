@@ -32,16 +32,10 @@ git clone https://github.com/Xilinx/linux-xlnx
 
 ## Build u-boot
 
-Reference: [Build U-Boot](https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/18841973/Build+U-Boot#BuildU-Boot-ConfiguringU-Boot(%3E%3D2020.1Release))
-
-```shell
-cd u-boot-xlnx
-make CROSS_COMPILE=arm-linux-gnueabihf- ARCH=arm xilinx_zynq_virt_defconfig
-DEVICE_TREE="zynq-zybo-z7" make
-```
+This repo expect u-boot was separately built and set boot files pathes in config.cmake file or get a build binary such as https://github.com/ikwzm/FPGA-SoC-Linux
 
 Under the project directory (zynq_debian), create build directory 'mkdir build', and change directory in it.
-Run cmake as 'cmake <zynq_debian-directory>'.
+Run cmake as 'cmake <zynq_debian source directory>'.
 
 Makefile will be generated, then
 1. run 'make' will create Debian root file system.  This process requires root privilege due to elevated command is in script files. After 'rootfs' was created, then
