@@ -1,0 +1,89 @@
+diff --git a/board/xilinx/common/board.c b/board/xilinx/common/board.c
+index 475628b925..ab0903274e 100644
+--- a/board/xilinx/common/board.c
++++ b/board/xilinx/common/board.c
+@@ -13,6 +13,8 @@
+ #include <i2c.h>
+ #include <linux/sizes.h>
+ #include <malloc.h>
++#include <spi.h>
++#include <spi_flash.h>
+ #include "board.h"
+ #include <dm.h>
+ #include <i2c_eeprom.h>
+@@ -21,6 +23,43 @@
+ 
+ #include "fru.h"
+ 
++#if defined(CONFIG_ZYNQ_QSPI) && defined(CONFIG_ZYNQ_GEM_SPI_MAC_OFFSET)
++int zynq_board_read_rom_ethaddr(unsigned char *ethaddr)
++{
++	int ret = -EINVAL;
++    struct spi_flash *flash;
++    flash = spi_flash_probe(CONFIG_SF_DEFAULT_BUS,
++                            CONFIG_SF_DEFAULT_CS,
++                            CONFIG_SF_DEFAULT_SPEED,
++                            CONFIG_SF_DEFAULT_MODE);
++    if (!flash) {
++        printf("%s: SPI(bus:%u cs:%u) probe failed\n", __func__
++               , CONFIG_SF_DEFAULT_BUS
++               , CONFIG_SF_DEFAULT_CS );
++        return 0;
++    }
++    if ( flash ) {
++        // See: https://github.com/Digilent/Genesys2/blob/master/Projects/user_demo/sdk/g2demo/src/qspi/qspi.c
++        // Although, code is bit deprecated, refer: https://qiita.com/ikwzm/items/1b79a528634fd2c09e1f
++        // and https://patchwork.ozlabs.org/project/uboot/patch/20180814045550.27492-1-luaraneda@gmail.com/
++        flash->read_opcode = 0x4b; // Read OTP reagion
++        if ( (ret = spi_flash_read(flash, CONFIG_ZYNQ_GEM_SPI_MAC_OFFSET, 6, ethaddr)) )
++            printf("%s: SPI MAC address read failed\n", __func__);
++        else
++            printf("%s: SPI MAC address read success %x:%x:%x:%x:%x:%x\n", __func__
++                   , ethaddr[0]
++                   , ethaddr[1]
++                   , ethaddr[2]
++                   , ethaddr[3]
++                   , ethaddr[4]
++                   , ethaddr[5]
++                );
++        spi_flash_free(flash);
++    }
++    return ret;
++}
++#endif
++
+ #if defined(CONFIG_ZYNQ_GEM_I2C_MAC_OFFSET)
+ int zynq_board_read_rom_ethaddr(unsigned char *ethaddr)
+ {
+@@ -92,7 +131,7 @@ static void xilinx_eeprom_legacy_cleanup(char *eeprom, int size)
+ 		byte = eeprom[i];
+ 
+ 		/* Remove all ffs and spaces */
+-		if (byte == 0xff || byte == ' ')
++		if ((unsigned)(byte) == 0xff || byte == ' ')
+ 			eeprom[i] = 0;
+ 
+ 		/* Convert strings to lower case */
+diff --git a/include/configs/zynq-common.h b/include/configs/zynq-common.h
+index 1607a8d065..557a891d30 100644
+--- a/include/configs/zynq-common.h
++++ b/include/configs/zynq-common.h
+@@ -39,6 +39,8 @@
+ # define CONFIG_BOOTP_MAY_FAIL
+ #endif
+ 
++#define CONFIG_ZYNQ_GEM_SPI_MAC_OFFSET 0x20
++
+ /* NOR */
+ #ifdef CONFIG_MTD_NOR_FLASH
+ # define CONFIG_SYS_MAX_FLASH_BANKS	1
+diff --git a/scripts/config_whitelist.txt b/scripts/config_whitelist.txt
+index 43295eec7d..51c7fc4da8 100644
+--- a/scripts/config_whitelist.txt
++++ b/scripts/config_whitelist.txt
+@@ -3986,4 +3986,5 @@ CONFIG_YAFFS_UTIL
+ CONFIG_YAFFS_WINCE
+ CONFIG_YELLOW_LED
+ CONFIG_ZLT
++CONFIG_ZYNQ_GEM_SPI_MAC_OFFSET
+ CONFIG_eTSEC_MDIO_BUS
