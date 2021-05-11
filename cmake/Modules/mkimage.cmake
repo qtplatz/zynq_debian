@@ -22,7 +22,6 @@ add_custom_command(
   COMMAND echo bootfs=${MNT_BOOTFS} rootfs=${MNT_ROOTFS} ${TOOLS}/mkfs.sh ${IMGFILE}
   COMMAND bootfs=${MNT_BOOTFS} rootfs=${MNT_ROOTFS} ${TOOLS}/mkfs.sh ${IMGFILE}
   COMMAND ${SUDO} ${CP} ${BOOT_FILES} ${MNT_BOOTFS}
-  COMMAND ${SUDO} outfile=${MNT_BOOTFS}/uEnv.txt ${TOOLS}/gen-uenv.sh
   COMMAND ${SUDO} ${CP} -ax "${ROOTFS}/*" "${MNT_ROOTFS}"
   COMMAND echo "======== modules_install ======"
   COMMAND ${SUDO} ${MAKE} -C ${KERNEL_SOURCE} ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- -j4 modules_install INSTALL_MOD_PATH=${MNT_ROOTFS}
