@@ -1,7 +1,7 @@
 Zybo Z7 SD Card image generator
 =====
 
-This project contains cmake and dependent bash scripts for de0-nano-soc debian boot SD-Card.
+This project contains cmake and dependent bash scripts for de0-nano-soc Debian boot SD-Card.
 
  Prerequisite
 ===============
@@ -10,13 +10,14 @@ This project contains cmake and dependent bash scripts for de0-nano-soc debian b
 2. Multiarch for armhf enabled on host.
 3. QEMU arm
 
- Dependent debian packages
+ Dependent Debian packages
 ===========================
 
 ```
 sudo dpkg --add-architecture armhf
 sudo apt-get -y install crossbuild-essential-armhf
 sudo apt-get -y install bc build-essential cmake dkms git libncurses5-dev
+sudo apt-get -y install u-boot-tools
 (May be some else...)
 ```
 
@@ -30,13 +31,46 @@ git clone https://github.com/Xilinx/u-boot-xlnx.git
 git clone https://github.com/Xilinx/linux-xlnx
 ```
 
-## Build u-boot
+The versions for the repositories as of writing this was:
+```
+xilinx-v2020.2-7997-g57460e4a93
+zynqmp-soc-fixes-for-v5.10-rc6-13549-g17d102b6645d
+```
 
-This repo expect u-boot was separately built and set boot files pathes in config.cmake file or get a build binary such as https://github.com/ikwzm/FPGA-SoC-Linux
+## Prepare prerequisite binaries
 
-Under the project directory (zynq_debian), create build directory 'mkdir build', and change directory in it.
+### Build u-boot
+
+```shell
+cd u-boot-xlnx
+patch -p1 < ../zynq_debian/u-boot-patch/u-boot_2021.04_z7_macaddr_qspi.patch
+make CROSS_COMPILE=arm-linux-gnueabihf- ARCH=arm xilinx_zynq_virt_defconfig
+DEVICE_TREE=zynq-zybo-z7 make CROSS_COMPILE=arm-linux-gnueabihf- ARCH=arm -j4
+```
+
+## Create boot.scr boot script binary
+
+Following commands will create boot.scr from boot.cmd under zynq_debian/src/ directory.
+
+```shell
+cd ../zynq_debian/src
+make
+```
+
+### Build linux kernel
+
+```shell
+cd ../linux-xlnx
+make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- xilinx_zynq_defconfig
+make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- -j8 zImage
+make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- -j8 all
+```
+
+## Build root filesystem (if not done yet) and SD Card image file
+
+Under the project directory (zynq_debian), create the build directory 'mkdir build' and change its directory.
 Run cmake as 'cmake <zynq_debian source directory>'.
 
-Makefile will be generated, then
-1. run 'make' will create Debian root file system.  This process requires root privilege due to elevated command is in script files. After 'rootfs' was created, then
-1. run 'make img' to make SD Card image file.  This step also requires root privilege for 'sudo' command.
+1. run 'make' will create the Debian root file system.  This process requires root privilege due to elevated command is in script files.
+Above make run will create the Debian root filesystem using "debootstraping."
+1. run 'make img' to make the SD Card image file.  This step also requires root privilege for internal use of the 'sudo' command.
