@@ -17,7 +17,7 @@ set ( ROOTFS ${CMAKE_BINARY_DIR}/arm-linux-gnueabihf-rootfs-${distro} )
 
 add_custom_command(
   OUTPUT ${ROOTFS}
-  COMMAND distro=${distro} targetdir=${ROOTFS} ${CMAKE_SOURCE_DIR}/scripts/debootstrap.sh
+  COMMAND distro=${distro} targetdir=${ROOTFS} host="zybo-z7" ${CMAKE_SOURCE_DIR}/scripts/debootstrap.sh
   )
 
 add_custom_target( rootfs ALL DEPENDS ${ROOTFS} ${CMAKE_SOURCE_DIR}/CMakeLists.txt )
