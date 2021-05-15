@@ -6,7 +6,6 @@ set( target_device "zybo-z7" )
 
 get_filename_component( topdir "${CMAKE_SOURCE_DIR}" DIRECTORY )
 
-#set( U_BOOT_DIR "${topdir}/FPGA-SoC-Linux/target/zynq-zybo-z7/boot" )
 set( U_BOOT_DIR "${topdir}/u-boot-xlnx" )
 set( KERNEL_SOURCE "${topdir}/linux-xlnx" )
 
