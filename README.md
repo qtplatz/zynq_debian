@@ -74,3 +74,10 @@ Run cmake as 'cmake <zynq_debian source directory>'.
 1. run 'make' will create the Debian root file system.  This process requires root privilege due to elevated command is in script files.
 Above make run will create the Debian root filesystem using "debootstraping."
 1. run 'make img' to make the SD Card image file.  This step also requires root privilege for internal use of the 'sudo' command.
+
+## Fix x86_64 binary installed on the target device
+
+Although, Debian provide a method bo build custom linux-header deb package, that contains x86_64 binaries under scripts, that will cause a problem when install DKMS package.  Dirty quick fix is as following:
+
+1. Copy kernel source (linux-xlnx etc.) under /usr/src/ on target filesystem (e.g. tar --exclude=./linux-xlnx/git -cvf linux-xlnx.tar ./linux-xlns)
+2. Run ```make scripts``` and ```modules_prepare``` on the target.
