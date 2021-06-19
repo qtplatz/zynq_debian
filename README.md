@@ -80,4 +80,4 @@ Above make run will create the Debian root filesystem using "debootstraping."
 Although, Debian provide a method bo build custom linux-header deb package, that contains x86_64 binaries under scripts, that will cause a problem when install DKMS package.  Dirty quick fix is as following:
 
 1. Copy kernel source (linux-xlnx etc.) under /usr/src/ on target filesystem (e.g. tar --exclude=./linux-xlnx/git -cvf linux-xlnx.tar ./linux-xlns)
-2. Run ```make scripts``` and ```modules_prepare``` on the target.
+2. Run ```make scripts``` and ```make modules_prepare``` at top directory of the kernel source on the target.
