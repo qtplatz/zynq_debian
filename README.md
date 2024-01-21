@@ -70,6 +70,8 @@ make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- -j8 all
 
 ## Build root filesystem (if not done yet) and SD Card image file
 
+Review the 'config.cmake' file and edit if necessary.
+
 Under the project directory (zynq_debian), create the build directory 'mkdir build' and change its directory.
 Run cmake as 'cmake <zynq_debian source directory>'.
 
