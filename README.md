@@ -15,6 +15,8 @@ This project contains cmake and dependent bash scripts for de0-nano-soc Debian b
 
 ```
 sudo dpkg --add-architecture armhf
+sudo apt update
+sudo apt upgrade
 sudo apt-get -y install crossbuild-essential-armhf
 sudo apt-get -y install bc build-essential cmake dkms git libncurses5-dev
 sudo apt-get -y install u-boot-tools
