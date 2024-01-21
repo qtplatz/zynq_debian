@@ -85,6 +85,7 @@ cmake ..
 make
 sudo chroot /home/toshi/src/zybo/zynq_debian/build/arm-linux-gnueabihf-rootfs-buster
 distro=buster /debootstrap.sh --second-stage
+I have no name!@host:/# exit
 make img
 ```
 
