@@ -77,6 +77,17 @@ Run cmake as 'cmake <zynq_debian source directory>'.
 Above make run will create the Debian root filesystem using "debootstraping."
 1. run 'make img' to make the SD Card image file.  This step also requires root privilege for internal use of the 'sudo' command.
 
+```shell
+cd ~/src/zynq_debian
+mkdir build
+cd build
+cmake ..
+make
+sudo chroot /home/toshi/src/zybo/zynq_debian/build/arm-linux-gnueabihf-rootfs-buster
+distro=buster /debootstrap.sh --second-stage
+make img
+```
+
 ## Fix x86_64 binary installed on the target device
 
 Although, Debian provide a method bo build custom linux-header deb package, that contains x86_64 binaries under scripts, that will cause a problem when install DKMS package.  Dirty quick fix is as following:
