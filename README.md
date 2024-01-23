@@ -34,12 +34,6 @@ git clone https://github.com/Xilinx/u-boot-xlnx.git
 git clone https://github.com/Xilinx/linux-xlnx
 ```
 
-The versions for the repositories as of writing this was:
-```
-xilinx-v2020.2-7997-g57460e4a93
-zynqmp-soc-fixes-for-v5.10-rc6-13549-g17d102b6645d
-```
-
 ## Prepare prerequisite binaries
 
 ### Build u-boot
@@ -49,10 +43,11 @@ cd u-boot-xlnx
 git checkout xilinx-v2023.2
 ```
 
-Quck dirty fix for reading mac address on zybo-z7 board.
+#### Quck dirty fix for reading mac address on zybo-z7 board (optional)
 ```shell
 patch -p1 < ../zynq_debian/u-boot-patch/u-boot_2023.2_z7_macaddr_qspi.patch
 ```
+#### Configure and build u-boot for zynq-zybo-z7
 ```shell
 make CROSS_COMPILE=arm-linux-gnueabihf- ARCH=arm xilinx_zynq_virt_defconfig
 ```
