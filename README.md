@@ -6,7 +6,7 @@ This project contains cmake and dependent bash scripts for de0-nano-soc Debian b
  Prerequisite
 ===============
 
-1. Linux (debian10) host (amd64).
+1. Linux (debian 12) host (amd64).
 2. Multiarch for armhf enabled on host.
 3. QEMU arm
 
@@ -20,6 +20,7 @@ sudo apt upgrade
 sudo apt-get -y install crossbuild-essential-armhf
 sudo apt-get -y install bc build-essential cmake dkms git libncurses5-dev
 sudo apt-get -y install u-boot-tools
+sudo apt-get -y install qemu-system-arm
 (May be some else...)
 ```
 
@@ -45,8 +46,17 @@ zynqmp-soc-fixes-for-v5.10-rc6-13549-g17d102b6645d
 
 ```shell
 cd u-boot-xlnx
-patch -p1 < ../zynq_debian/u-boot-patch/u-boot_2021.04_z7_macaddr_qspi.patch
+git checkout xilinx-v2023.2
+```
+
+Quck dirty fix for reading mac address on zybo-z7 board.
+```shell
+patch -p1 < ../zynq_debian/u-boot-patch/u-boot_2023.2_z7_macaddr_qspi.patch
+```
+```shell
 make CROSS_COMPILE=arm-linux-gnueabihf- ARCH=arm xilinx_zynq_virt_defconfig
+```
+```shell
 DEVICE_TREE=zynq-zybo-z7 make CROSS_COMPILE=arm-linux-gnueabihf- ARCH=arm -j4
 ```
 
@@ -64,7 +74,11 @@ make
 ```shell
 cd ../linux-xlnx
 make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- xilinx_zynq_defconfig
+```
+```shell
 make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- -j8 zImage
+```
+```shell
 make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- -j8 all
 ```
 
@@ -77,23 +91,19 @@ Run cmake as 'cmake <zynq_debian source directory>'.
 
 1. run 'make' will create the Debian root file system.  This process requires root privilege due to elevated command is in script files.
 Above make run will create the Debian root filesystem using "debootstraping."
+1. At the middle of script, it shows two lines of command, which user need to run on console.
 1. run 'make img' to make the SD Card image file.  This step also requires root privilege for internal use of the 'sudo' command.
 
-```shell
-cd ~/src/zynq_debian
-mkdir build
-cd build
-cmake ..
-make
-sudo chroot /home/toshi/src/zybo/zynq_debian/build/arm-linux-gnueabihf-rootfs-buster
-distro=buster /debootstrap.sh --second-stage
-I have no name!@host:/# exit
-make img
-```
+## Fix /etc/network/interface file
+
+Depend on the debian version, interface name changed to end0 rather than eth0.  Adjust /etc/network/interface file when necessary.
 
 ## Fix x86_64 binary installed on the target device
 
-Although, Debian provide a method bo build custom linux-header deb package, that contains x86_64 binaries under scripts, that will cause a problem when install DKMS package.  Dirty quick fix is as following:
+Although, Debian provide a method to build custom linux-header deb package, that contains x86_64 binaries under scripts, that will cause a problem when install DKMS package.  Dirty quick fix is as following:
 
-1. Copy kernel source (linux-xlnx etc.) under /usr/src/ on target filesystem (e.g. tar --exclude=./linux-xlnx/git -cvf linux-xlnx.tar ./linux-xlns)
+1. Copy kernel source (linux-xlnx etc.) under /usr/src/ on target filesystem (e.g. `tar --exclude=./linux-xlnx/.git -cvf linux-xlnx.tar ./linux-xlns`)
 2. Run ```make scripts``` and ```make modules_prepare``` at top directory of the kernel source on the target.
+
+
+Eth: 00:18:3e:03:73:11

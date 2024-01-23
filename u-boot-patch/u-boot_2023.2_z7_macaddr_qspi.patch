@@ -1,0 +1,82 @@
+diff --git a/board/xilinx/common/board.c b/board/xilinx/common/board.c
+index 66edf857f1..20c8bdd187 100644
+--- a/board/xilinx/common/board.c
++++ b/board/xilinx/common/board.c
+@@ -32,6 +32,14 @@
+ 
+ #include "fru.h"
+ 
++#if defined(CONFIG_ZYNQ_QSPI)
++# ifndef CONFIG_ZYNQ_GEM_SPI_MAC_OFFSET
++# define CONFIG_ZYNQ_GEM_SPI_MAC_OFFSET 0x20
++# endif
++int zynq_board_read_rom_ethaddr(unsigned char *ethaddr);
++#endif
++
++
+ #if CONFIG_IS_ENABLED(EFI_HAVE_CAPSULE_SUPPORT)
+ struct efi_fw_image fw_images[] = {
+ #if defined(XILINX_BOOT_IMAGE_GUID)
+@@ -493,6 +501,16 @@ int board_late_init_xilinx(void)
+ 	if (ret)
+ 		printf("%s: Saving run time variables FAILED\n", __func__);
+ 
++#if defined( CONFIG_ZYNQ_QSPI ) && defined( CONFIG_ZYNQ_GEM_SPI_MAC_OFFSET )
++    /* Quck dirty hack for Digilient zybo eth addr read */
++    {
++        unsigned char ethaddr[6];
++        if ( zynq_board_read_rom_ethaddr(ethaddr) == 0 ) {
++            eth_env_set_enetaddr_by_index("eth", 0, ethaddr);
++        }
++    }
++#endif
++
+ 	return 0;
+ }
+ #endif
+@@ -675,3 +693,45 @@ phys_size_t board_get_usable_ram_top(phys_size_t total_size)
+ 	return reg + size;
+ }
+ #endif
++
++//////////////////////////
++#if defined(CONFIG_ZYNQ_QSPI) && defined(CONFIG_ZYNQ_GEM_SPI_MAC_OFFSET)
++#include <spi.h>
++#include <spi_flash.h>
++
++int
++zynq_board_read_rom_ethaddr(unsigned char *ethaddr)
++{
++	int ret = -EINVAL;
++    struct spi_flash *flash;
++    flash = spi_flash_probe(CONFIG_SF_DEFAULT_BUS,
++                            CONFIG_SF_DEFAULT_CS,
++                            CONFIG_SF_DEFAULT_SPEED,
++                            CONFIG_SF_DEFAULT_MODE);
++    if (!flash) {
++        printf("%s: SPI(bus:%u cs:%u) probe failed\n", __func__
++               , CONFIG_SF_DEFAULT_BUS
++               , CONFIG_SF_DEFAULT_CS );
++        return 0;
++    }
++    if ( flash ) {
++        // See: https://github.com/Digilent/Genesys2/blob/master/Projects/user_demo/sdk/g2demo/src/qspi/qspi.c
++        // Although, code is bit deprecated, refer: https://qiita.com/ikwzm/items/1b79a528634fd2c09e1f
++        // and https://patchwork.ozlabs.org/project/uboot/patch/20180814045550.27492-1-luaraneda@gmail.com/
++        flash->read_opcode = 0x4b; // Read OTP reagion
++        if ( (ret = spi_flash_read(flash, CONFIG_ZYNQ_GEM_SPI_MAC_OFFSET, 6, ethaddr)) )
++            printf("%s: SPI MAC address read failed\n", __func__);
++        else
++            printf("%s: SPI MAC address read success %x:%x:%x:%x:%x:%x\n", __func__
++                   , ethaddr[0]
++                   , ethaddr[1]
++                   , ethaddr[2]
++                   , ethaddr[3]
++                   , ethaddr[4]
++                   , ethaddr[5]
++                );
++        spi_flash_free(flash);
++    }
++    return ret;
++}
++#endif

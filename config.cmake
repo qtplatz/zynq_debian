@@ -1,5 +1,5 @@
 
-set( distro "buster" )
+set( distro "bookworm" )
 set( target "zynq" )
 set( cross_target "armhf" )
 set( target_device "zybo-z7" )
@@ -11,7 +11,7 @@ set( KERNEL_SOURCE "${topdir}/linux-xlnx" )
 
 set ( DTB             "${U_BOOT_DIR}/u-boot.dtb" )
 set ( DTS             "${U_BOOT_DIR}/arch/arm/dts/zynq-zybo-z7.dts" )
-set ( U-BOOT_BOOT_BIN "${U_BOOT_DIR}/spl/boot.bin" )
+set ( U_BOOT_BOOT_BIN "${U_BOOT_DIR}/spl/boot.bin" )
 set ( U_BOOT_IMG      "${U_BOOT_DIR}/u-boot.img" )
 
 set ( BOOT_SCR        "${CMAKE_SOURCE_DIR}/src/boot.scr" )
