@@ -54,12 +54,10 @@ else
     /debootstrap/debootstrap --second-stage
 
     cat <<EOF>/etc/apt/sources.list
-deb http://ftp.jaist.ac.jp/debian $distro main contrib non-free
-deb-src http://ftp.jaist.ac.jp/debian $distro main contrib non-free
-deb http://ftp.jaist.ac.jp/debian $distro-updates main contrib non-free
-deb-src http://ftp.jaist.ac.jp/debian $distro-updates main contrib non-free
-deb http://security.debian.org/debian-security $distro/updates main contrib non-free
-deb-src http://security.debian.org/debian-security $distro/updates main contrib non-free
+deb http://deb.debian.org/debian $distro contrib main non-free-firmware
+deb http://deb.debian.org/debian $distro-updates contrib main non-free-firmware
+deb http://deb.debian.org/debian $distro-backports contrib main non-free-firmware
+deb http://deb.debian.org/debian-security $distro-security contrib main non-free-firmware
 EOF
 
     cat <<EOF >/etc/network/interfaces
@@ -73,15 +71,18 @@ auto lo
 iface lo inet loopback
 
 # The primary network interface
-allow-hotplug eth0
-iface eth0 inet dhcp
+allow-hotplug end0
+iface end0 inet dhcp
 # This is an autoconfigured IPv6 interface
-iface eth0 inet6 auto
+#iface eth0 inet6 auto
 EOF
 
+	apt install ca-certificates
     apt-get update
     apt-get -y install locales dialog
     dpkg-reconfigure locales
+
+	sudo sed -i 's/http/https/g' /etc/apt/sources.list
 
     apt-get -y install openssh-server ntpdate i2c-tools sudo
 
